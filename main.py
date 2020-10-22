@@ -1,49 +1,70 @@
-from flask import Flask, request
-from caesar import rotate_string
+
+from flask import Flask, request, redirect
+import cgi
+import os
+import jinja2
+
+template_dir = os.path.join(os.path.dirname(__file__), 'templates')
+jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir), autoescape=True)
+
 app = Flask('app')
-form = """<!DOCTYPE html>
+app.config['DEBUG'] = True
 
-<html>
-    <head>
-        <style>
-            form {{
-                background-color: #eee;
-                padding: 20px;
-                margin: 0 auto;
-                width: 540px;
-                font: 16px sans-serif;
-                border-radius: 10px;
-            }}
-            textarea {{
-                margin: 10px 0;
-                width: 540px;
-                height: 120px;
-            }}
-        </style>
-    </head>
-    <body>
-      <form action="/" method="POST">
-        <label for="rot">Rotate by:</label>
-        <input type="text" name="rot" value = 0>
-        <br>
-        <br>
-        <textarea name="text">{0}</textarea>
-        <br>
-        <br>
-        <input type="submit" value="Submit Query">
-      </form>
-    </body>
-</html>"""
 
-@app.route('/')
+
+@app.route("/")
 def index():
-  return form.format("")
+  template = jinja_env.get_template('user_signup.html')
+  return template.render()
 
-@app.route('/', methods=["POST"])
-def encrypt():
-  rot = int(request.form['rot'])
-  text = request.form['text']
-  return form.format(rotate_string(text,rot))
+@app.route("/", methods=['POST'])
+def vailidate():
+  name = request.form['username']
+  email = request.form['email']
+  password = request.form['password']
+  confirm = request.form['confirm']
+  nameerror = ""
+  emailerror = ""
+  passworderror = ""
+  confirmerror = ""
+  template = jinja_env.get_template('user_signup.html')
+  
+
+  def validate(entry):
+    if len(str(entry)) == 0:
+      return False
+    else:
+      return True
+
+  if not validate(name):
+    nameerror = "Invalid Username"
+    password = ""
+    confirm = ""
+    return template.render(username = name, email = email, password = password, confirm = confirm, nameerror = nameerror, emailerror = emailerror, passworderror = passworderror, confirmerror = confirmerror)
+  if not validate(email):
+    emailerror = "Invalid Email"
+    password = ""
+    confirm = ""
+    return template.render(username = name, email = email, password = password, confirm = confirm, nameerror = nameerror, emailerror = emailerror, passworderror = passworderror, confirmerror = confirmerror)
+  if not validate(password):
+    passworderror = "Invalid Password"
+    password = ""
+    confirm = ""
+    return template.render(username = name, email = email, password = password, confirm = confirm, nameerror = nameerror, emailerror = emailerror, passworderror = passworderror, confirmerror = confirmerror)
+  if not validate(confirm):
+    confirmerror = "Please Confirm Your Password"
+    password = ""
+    confirm = ""
+    return template.render(username = name, email = email, password = password, confirm = confirm, nameerror = nameerror, emailerror = emailerror, passworderror = passworderror, confirmerror = confirmerror)
+  
+  
+  
+  
+  else:
+    template = jinja_env.get_template('welcome_screen.html')
+    return template.render(username = name)
+
+  
 
 
 
